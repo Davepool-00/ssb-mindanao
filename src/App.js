@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import Lightbox from "yet-another-react-lightbox";
@@ -15,9 +15,10 @@ const membersWithContainImage = [
 const members = [
   {
     name: "Ariel Polancos",
-    image: "/members/ariel.jpeg",
+    image: "/members/ariel.jpg",
+    folder: "Ariel",
     bio: "Lives for the curves, stays for the brotherhood.",
-    bikes: ["Yamaha YZF-R3", "KTM Duke 390", "Honda CB650R"],
+    bikes: ["Yamaha YZF-R3"],
     memberSince: "January 1, 2025",
   },
   {
@@ -205,9 +206,37 @@ function App() {
     setTimeout(() => setShowHint(false), 4000);
     setTimeout(() => setIsLightboxOpen(true), 0);
   };
+  const [showDevNotice, setShowDevNotice] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowDevNotice(false), 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <>
+      <div
+        style={{
+          position: "fixed",
+          top: "20px",
+          left: "20px",
+          backgroundColor: "#212529", // Dark neutral tone
+          color: "#ffc107", // Bootstrap warning yellow
+          padding: "8px 16px",
+          borderRadius: "20px",
+          fontSize: "13px",
+          fontWeight: 500,
+          zIndex: 9999,
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)",
+          backdropFilter: "blur(4px)",
+          border: "1px solid rgba(255, 193, 7, 0.4)",
+          pointerEvents: "none", // non-blocking
+          userSelect: "none",
+        }}
+      >
+        🚧 This site is under development
+      </div>
+
       {/* Navbar */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-black sticky-top shadow">
         <div className="container">
@@ -477,6 +506,31 @@ function App() {
           </>
         )}
       </>
+
+      {/*Dev Notice */}
+      {showDevNotice && (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "#212529",
+            color: "#ffc107",
+            padding: "16px 24px",
+            borderRadius: "12px",
+            fontSize: "15px",
+            fontWeight: 500,
+            zIndex: 9999,
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+            opacity: 1,
+            animation: "fadeInOut 4s ease-in-out",
+            pointerEvents: "none",
+          }}
+        >
+          🚧 This site is under development
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="bg-black text-white py-3 text-center">
