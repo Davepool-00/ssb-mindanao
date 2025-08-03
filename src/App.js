@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import Lightbox from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 
 const membersWithContainImage = [
@@ -153,12 +154,11 @@ function getImageStyle(name) {
 }
 
 function App() {
-  const [showHint, setShowHint] = useState(false);
-
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [lightboxImages, setLightboxImages] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
+  const [showHint, setShowHint] = useState(false);
 
   const shuffledMembers = useMemo(() => {
     const copy = [...members];
@@ -197,17 +197,13 @@ function App() {
       return;
     }
 
-    const startIndex = validImages.indexOf(clickedImagePath);
-    setLightboxImages(validImages);
+    const startIndex = validImages.findIndex((img) => img === clickedImagePath);
+
+    setLightboxImages(validImages.map((src) => ({ src })));
     setLightboxIndex(startIndex !== -1 ? startIndex : 0);
-
-    // Show hint briefly
     setShowHint(true);
-    setTimeout(() => setShowHint(false), 4000); // Hide after 4 seconds
-
-    setTimeout(() => {
-      setIsLightboxOpen(true);
-    }, 0);
+    setTimeout(() => setShowHint(false), 4000);
+    setTimeout(() => setIsLightboxOpen(true), 0);
   };
 
   return (
@@ -375,7 +371,10 @@ function App() {
                 <button
                   type="button"
                   className="btn-close"
-                  onClick={() => setSelectedMember(null)}
+                  onClick={() => {
+                    setIsLightboxOpen(false);
+                    setSelectedMember(null);
+                  }}
                 ></button>
               </div>
               <div className="modal-body text-center">
@@ -442,52 +441,42 @@ function App() {
       )}
 
       {/* Lightbox */}
-      {isLightboxOpen && (
-        <>
-          {showHint && (
-            <div
-              style={{
-                position: "fixed",
-                bottom: "20px",
-                left: "50%",
-                transform: "translateX(-50%)",
-                background: "rgba(0, 0, 0, 0.75)",
-                color: "#fff",
-                padding: "10px 20px",
-                borderRadius: "8px",
-                zIndex: 2000,
-                fontSize: "14px",
-              }}
-            >
-              ⚠️ First image may take time. Please click next or previous. Still
-              in development.
-            </div>
-          )}
+      <>
+        {isLightboxOpen && (
+          <>
+            {showHint && (
+              <div
+                style={{
+                  position: "fixed",
+                  bottom: "20px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "rgba(0, 0, 0, 0.75)",
+                  color: "#fff",
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  zIndex: 2000,
+                  fontSize: "14px",
+                }}
+              >
+                ⚠️ First image may take time. Please click next or previous.
+                Still in development.
+              </div>
+            )}
 
-          <Lightbox
-            mainSrc={lightboxImages[lightboxIndex]}
-            nextSrc={
-              lightboxImages[(lightboxIndex + 1) % lightboxImages.length]
-            }
-            prevSrc={
-              lightboxImages[
-                (lightboxIndex + lightboxImages.length - 1) %
-                  lightboxImages.length
-              ]
-            }
-            onCloseRequest={() => setIsLightboxOpen(false)}
-            onMovePrevRequest={() =>
-              setLightboxIndex(
-                (lightboxIndex + lightboxImages.length - 1) %
-                  lightboxImages.length
-              )
-            }
-            onMoveNextRequest={() =>
-              setLightboxIndex((lightboxIndex + 1) % lightboxImages.length)
-            }
-          />
-        </>
-      )}
+            <Lightbox
+              plugins={[Zoom]}
+              open={isLightboxOpen}
+              close={() => setIsLightboxOpen(false)}
+              slides={lightboxImages}
+              index={lightboxIndex}
+              on={{
+                view: ({ index }) => setLightboxIndex(index),
+              }}
+            />
+          </>
+        )}
+      </>
 
       {/* Footer */}
       <footer className="bg-black text-white py-3 text-center">
